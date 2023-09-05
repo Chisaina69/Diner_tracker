@@ -39,3 +39,5 @@ class InspectionResult(Base):
     inspection_id = Column(Integer(), ForeignKey('inspections.id'))
 
     inspection = relationship('Inspection', backref=backref('inspection_results'))
+
+    print ('Hello ken')
