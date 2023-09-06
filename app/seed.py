@@ -1,3 +1,4 @@
+from datetime import datetime
 from models import Base, engine, session, Restaurant, Inspection, InspectionResult
 from sqlalchemy.exc import OperationalError
 
@@ -17,10 +18,11 @@ def seed_database():
     restaurant2 = Restaurant(name="Taco Bell", health_rating="B")
     session.add(restaurant1)
     session.add(restaurant2)
-    
+
     # Create inspections for those restaurants
-    inspection1 = Inspection(inspector="John", date="2023-09-06", restaurant=restaurant1)
-    inspection2 = Inspection(inspector="Jane", date="2023-09-05", restaurant=restaurant2)
+    # Convert the string date to a Python date object using datetime.strptime
+    inspection1 = Inspection(inspector="John", date=datetime.strptime("2023-09-06", "%Y-%m-%d").date(), restaurant=restaurant1)
+    inspection2 = Inspection(inspector="Jane", date=datetime.strptime("2023-09-05", "%Y-%m-%d").date(), restaurant=restaurant2)
     session.add(inspection1)
     session.add(inspection2)
     

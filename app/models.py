@@ -1,14 +1,13 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy import Integer, String, Column, Date, ForeignKey
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 
 engine = create_engine('sqlite:///diner_tracker.db')
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
-
 
 class Restaurant(Base):
     __tablename__ = 'restaurants'
@@ -17,7 +16,7 @@ class Restaurant(Base):
     name = Column(String())
     health_rating = Column(Integer)
 
-    inspections = relationship('Inspection', backref=backref('restaurant'))
+    inspections = relationship('Inspection', back_populates='restaurant')
 
     def __repr__(self):
         return f"<Restaurant(id={self.id}, name='{self.name}', health_rating={self.health_rating})>"
@@ -42,20 +41,16 @@ class Restaurant(Base):
         session.delete(self)
         session.commit()
 
-
 class Inspection(Base):
     __tablename__ = 'inspections'
 
     id = Column(Integer(), primary_key=True)
     inspector = Column(Integer())
     date = Column(Date())
-    # Define relationship
     restaurant_id = Column(Integer(), ForeignKey('restaurants.id'))
-    # One to many relationship
-    restaurant = relationship('Restaurant', backref=backref('inspections'))
-
-    inspection_results = relationship(
-        'InspectionResult', backref=backref('inspection'))
+    
+    restaurant = relationship('Restaurant', back_populates='inspections')
+    inspection_results = relationship('InspectionResult', backref='inspection')
 
     def __repr__(self):
         return f"<Inspection(id={self.id}, inspector={self.inspector}, date='{self.date}')>"
@@ -66,16 +61,12 @@ class Inspection(Base):
     def get_most_recent_inspection(self):
         return session.query(Inspection).filter_by(restaurant=self).order_by(Inspection.date.desc()).first()
 
-
 class InspectionResult(Base):
     __tablename__ = 'inspection_results'
 
     id = Column(Integer(), primary_key=True)
     results = Column(String())
     inspection_id = Column(Integer(), ForeignKey('inspections.id'))
-
-    inspection = relationship(
-        'Inspection', backref=backref('inspection_results'))
 
     def __repr__(self):
         return f"<InspectionResult(id={self.id}, results='{self.results}', inspection_id={self.inspection_id})>"
@@ -85,7 +76,6 @@ class InspectionResult(Base):
         new_result = cls(results=results, inspection_id=inspection_id)
         session.add(new_result)
         session.commit()
-        return new_result
 
     def update_results(self, new_results):
         self.results = new_results
