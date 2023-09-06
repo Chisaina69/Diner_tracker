@@ -1,6 +1,9 @@
 from datetime import datetime
 from models import Base, engine, session, Restaurant, Inspection, InspectionResult
 from sqlalchemy.exc import OperationalError
+from faker import Faker
+
+fake = Faker()
 
 def ensure_database_exists():
     try:
@@ -13,24 +16,25 @@ def ensure_database_exists():
         print("Tables created!")
 
 def seed_database():
-    # Create some sample restaurants
-    restaurant1 = Restaurant(name="Burger King", health_rating="A")
-    restaurant2 = Restaurant(name="Taco Bell", health_rating="B")
-    session.add(restaurant1)
-    session.add(restaurant2)
-
-    # Create inspections for those restaurants
-    # Convert the string date to a Python date object using datetime.strptime
-    inspection1 = Inspection(inspector="John", date=datetime.strptime("2023-09-06", "%Y-%m-%d").date(), restaurant=restaurant1)
-    inspection2 = Inspection(inspector="Jane", date=datetime.strptime("2023-09-05", "%Y-%m-%d").date(), restaurant=restaurant2)
-    session.add(inspection1)
-    session.add(inspection2)
+    # Number of restaurants to seed
+    num_restaurants = 100
     
-    # Create inspection results for those inspections
-    result1 = InspectionResult(results="Clean", inspection=inspection1)
-    result2 = InspectionResult(results="Not Clean", inspection=inspection2)
-    session.add(result1)
-    session.add(result2)
+    for _ in range(num_restaurants):
+        restaurant_name = fake.company()
+        health_rating = fake.random_element(elements=("A", "B", "C", "D", "F"))
+        restaurant = Restaurant(name=restaurant_name, health_rating=health_rating)
+        session.add(restaurant)
+
+        # Create inspections for those restaurants
+        inspection_date = fake.date_this_year(before_today=True, after_today=False)
+        inspector_name = fake.first_name()
+        inspection = Inspection(inspector=inspector_name, date=datetime.strptime(inspection_date, "%Y-%m-%d").date(), restaurant=restaurant)
+        session.add(inspection)
+
+        # Create inspection results for those inspections
+        result_text = fake.random_element(elements=("Clean", "Not Clean", "Needs Improvement", "Excellent"))
+        result = InspectionResult(results=result_text, inspection=inspection)
+        session.add(result)
     
     session.commit()
 
