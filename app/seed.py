@@ -1,4 +1,15 @@
-from models import Restaurant, Inspection, InspectionResult, session
+from models import Base, engine, session, Restaurant, Inspection, InspectionResult
+from sqlalchemy.exc import OperationalError
+
+def ensure_database_exists():
+    try:
+        # Try to query the restaurant table
+        session.query(Restaurant).first()
+    except OperationalError:
+        # If we get an OperationalError, the table probably doesn't exist
+        print("Creating database tables...")
+        Base.metadata.create_all(engine)
+        print("Tables created!")
 
 def seed_database():
     # Create some sample restaurants
@@ -22,4 +33,5 @@ def seed_database():
     session.commit()
 
 if __name__ == "__main__":
+    ensure_database_exists()
     seed_database()
