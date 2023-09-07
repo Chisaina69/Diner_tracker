@@ -1,14 +1,13 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy import Integer, String, Column, Date, ForeignKey
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 
 engine = create_engine('sqlite:///diner_tracker.db')
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
-
 
 class Restaurant(Base):
     __tablename__ = 'restaurants'
@@ -45,7 +44,6 @@ class Restaurant(Base):
         session.delete(self)
         session.commit()
 
-
 class Inspection(Base):
     __tablename__ = 'inspections'
 
@@ -68,8 +66,7 @@ class Inspection(Base):
         # session.commit() inoder to commit changes to the database
 
     def get_most_recent_inspection(self):
-        # finds all the inspections for a current restaurant(one to many) then calls them by date in desc order(largest to smallest) after returns the most recent as the first
-        return session.query(Inspection).filter_by(restaurant=self).order_by(Inspection.assigned_date.desc()).first()
+        return session.query(Inspection).filter_by(restaurant=self).order_by(Inspection.date.desc()).first()
 
 
 class InspectionResult(Base):
