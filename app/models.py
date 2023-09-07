@@ -51,7 +51,7 @@ class Inspection(Base):
 
     id = Column(Integer(), primary_key=True)
     inspector = Column(Integer())
-    date = Column(Date())
+    assigned_date = Column(Date())
     # Define relationship
     restaurant_id = Column(Integer(), ForeignKey('restaurants.id'))
     # One to many relationship
@@ -61,7 +61,7 @@ class Inspection(Base):
         'InspectionResult', backref=backref('inspection_name'))
 
     def __repr__(self):
-        return f"<Inspection(id={self.id}, inspector={self.inspector}, date='{self.date}')>"
+        return f"<Inspection(id={self.id}, inspector={self.inspector}, date='{self.assigned_date}')>"
     # Basically assisnges an inspector and update  
     def update_inspector(self, new_inspector):
         self.inspector = new_inspector
@@ -69,7 +69,7 @@ class Inspection(Base):
 
     def get_most_recent_inspection(self):
         # finds all the inspections for a current restaurant(one to many) then calls them by date in desc order(largest to smallest) after returns the most recent as the first
-        return session.query(Inspection).filter_by(restaurant=self).order_by(Inspection.date.desc()).first()
+        return session.query(Inspection).filter_by(restaurant=self).order_by(Inspection.assigned_date.desc()).first()
 
 
 class InspectionResult(Base):
