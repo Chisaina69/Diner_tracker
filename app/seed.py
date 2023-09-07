@@ -3,6 +3,8 @@ from models import engine, session, Restaurant, Inspection, InspectionResult
 from faker import Faker
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=sa_exc.SAWarning)
 
 
 fake = Faker()
@@ -35,7 +37,7 @@ if __name__ == "__main__":
         # Create inspections for those restaurants
         inspection_date = set_dates[i]
         inspector_name = fake.first_name()
-        inspection = Inspection(inspector=inspector_name, date=(
+        inspection = Inspection(inspector=inspector_name, assigned_date=(
             inspection_date), restaurant=restaurant)
         session.add(inspection)
 

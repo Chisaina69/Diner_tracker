@@ -1,13 +1,19 @@
-from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy import Integer, String, Column, Date, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.orm import sessionmaker
+import warnings
+from sqlalchemy import exc as sa_exc
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=sa_exc.SAWarning)
 
 engine = create_engine('sqlite:///diner_tracker.db')
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
+
 
 class Restaurant(Base):
     __tablename__ = 'restaurants'
@@ -16,7 +22,7 @@ class Restaurant(Base):
     name = Column(String())
     health_rating = Column(Integer)
 
-    inspections = relationship('Inspection', backref=backref('restaurant_name'))
+    inspections = relationship('Inspection', back_populates='restaurant')
 
     def __repr__(self):
         return f"<Restaurant(id={self.id}, name='{self.name}', health_rating={self.health_rating})>"
@@ -36,6 +42,7 @@ class Restaurant(Base):
         else:
             return None
     # updates the health rating then commits
+
     def update_health_rating(self, new_rating):
         self.health_rating = new_rating
         session.commit()
@@ -43,6 +50,7 @@ class Restaurant(Base):
     def delete(self):
         session.delete(self)
         session.commit()
+
 
 class Inspection(Base):
     __tablename__ = 'inspections'
@@ -53,14 +61,14 @@ class Inspection(Base):
     # Define relationship
     restaurant_id = Column(Integer(), ForeignKey('restaurants.id'))
     # One to many relationship
-    restaurant = relationship('Restaurant', backref=backref('inspection_name'))
+    restaurant = relationship('Restaurant', back_populates='inspections')
 
-    inspection_results = relationship(
-        'InspectionResult', backref=backref('inspection_name'))
+    inspection_results = relationship('InspectionResult', back_populates='inspection_name')
 
     def __repr__(self):
         return f"<Inspection(id={self.id}, inspector={self.inspector}, date='{self.assigned_date}')>"
-    # Basically assisnges an inspector and update  
+    # Basically assisnges an inspector and update
+
     def update_inspector(self, new_inspector):
         self.inspector = new_inspector
         # session.commit() inoder to commit changes to the database
@@ -76,8 +84,8 @@ class InspectionResult(Base):
     results = Column(String())
     inspection_id = Column(Integer(), ForeignKey('inspections.id'))
 
-    inspection = relationship(
-        'Inspection', backref=backref('inspection_results1'))
+    inspection_name = relationship(
+        'Inspection', back_populates='inspection_results')
 
     def __repr__(self):
         return f"<InspectionResult(id={self.id}, results='{self.results}', inspection_id={self.inspection_id})>"
@@ -88,9 +96,11 @@ class InspectionResult(Base):
         session.add(new_result)
         session.commit()
         return session.query(cls).filter_by(inspection_id=inspection_id).all()
-    
 
     def update_results(self, new_results):
         self.results = new_results
         session.commit()
 
+
+inspection1 = session.query(Inspection).first()
+print(inspection1.restaurant)
