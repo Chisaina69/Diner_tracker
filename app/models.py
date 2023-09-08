@@ -104,8 +104,8 @@ class InspectionResult(Base):
 
 # inspection1 = session.query(Inspection).first()
 # print(inspection1.restaurant)
-inspection1 = session.query(Inspection).first()
-if inspection1:
-    print(inspection1.restaurant)
-else:
-    print("No inspection found.")
+# inspection1 = session.query(Inspection).first()
+# if inspection1:
+#     print(inspection1.restaurant)
+# else:
+#     print("No inspection found.")
