@@ -102,5 +102,10 @@ class InspectionResult(Base):
         session.commit()
 
 
+# inspection1 = session.query(Inspection).first()
+# print(inspection1.restaurant)
 inspection1 = session.query(Inspection).first()
-print(inspection1.restaurant)
+if inspection1:
+    print(inspection1.restaurant)
+else:
+    print("No inspection found.")

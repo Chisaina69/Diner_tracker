@@ -1,16 +1,17 @@
+from sqlalchemy.exc import SAWarning
+import warnings
 from datetime import date
 from models import engine, session, Restaurant, Inspection, InspectionResult
 from faker import Faker
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", category=sa_exc.SAWarning)
 
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=SAWarning)
 
 fake = Faker()
 
 set_dates = [date(2023, 9, i) for i in range(1, 21)]
-
 
 if __name__ == "__main__":
 
@@ -25,7 +26,6 @@ if __name__ == "__main__":
 
     print("seeding.....")
 
-    restaurant = []
     for i in range(20):
         restaurant_name = fake.company()
         health_rating = fake.random_element(
@@ -37,15 +37,15 @@ if __name__ == "__main__":
         # Create inspections for those restaurants
         inspection_date = set_dates[i]
         inspector_name = fake.first_name()
-        inspection = Inspection(inspector=inspector_name, assigned_date=(
-            inspection_date), restaurant=restaurant)
+        inspection = Inspection(inspector=inspector_name, assigned_date=inspection_date, restaurant=restaurant)
         session.add(inspection)
 
         # Create inspection results for those inspections
         result_text = fake.random_element(
             elements=("Clean", "Not Clean", "Needs Improvement", "Excellent"))
-        result = InspectionResult(
-            results=result_text, inspection=inspection)
+        
+        # Here's the change: Instead of inspection, we use inspection_name
+        result = InspectionResult(results=result_text, inspection_name=inspection)
         session.add(result)
 
     session.commit()
